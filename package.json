@@ -1,0 +1,21 @@
+{
+  "name": "udooneo",
+  "version": "0.0.1",
+  "description": "Node wrapper to control your UDOO Neo",
+  "main": "udooneo.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bouiboui/udooneo"
+  },
+  "keywords": [
+    "udoo",
+    "neo",
+    "udooneo"
+  ],
+  "author": "bouiboui",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bouiboui/udooneo/issues"
+  },
+  "homepage": "https://github.com/bouiboui/udooneo"
+}
