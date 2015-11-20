@@ -2,11 +2,12 @@ var udooneo = require("./udooneo");
 
 udooneo.gpios.forEach(function (gpioNum) {
     var gpio = new udooneo.GPIO(gpioNum);
-    console.log("Watching GPIO " + gpioNum);
+    gpio.getValue(function (value) {
+        console.log("GPIO " + gpioNum + " current value: " + value);
+    });
     gpio.watchValue(function () {
-        console.log("GPIO " + gpioNum + " change");
         gpio.getValue(function (value) {
-            console.log("GPIO " + gpioNum + " new value: " + value);
+            console.log("GPIO " + gpioNum + " change - new value: " + value);
         });
     });
 });
