@@ -2,8 +2,14 @@
 
 ![](http://i.imgur.com/ef7aNZi.png)
 
-**Disclaimer**
-This code has never been tested on an actual UDOO Neo, it was developed only from specs and on a local development environment, so run it with caution.
+## Introduction
+This library makes it easy to control your UDOO Neo from node.
+
+Just ``require("./udooneo")`` and you have access to the GPIOs and motion sensors.
+
+Some features for GPIOs include ``.watchValue(callback)`` which triggers your callback function every time a GPIO value changes, ``.setValue()`` to set a specific value (HIGH or LOW), ``Accelerometer``, ``Magnetometer`` and ``Gyroscope`` ``.enable(callback)``, ``.disable(callback)`` and ``.getData(callback)``.
+
+Take a look at the examples to understand better.
 
 ## Getting started
 To get started, let's review the [test.js](https://github.com/bouiboui/udooneo/blob/master/examples/test.js) source code.
@@ -16,9 +22,9 @@ First we require the *udooneo* library:
 	
 **The first part of the code will allow us to listen to all the GPIOs of the UDOO Neo, and to display the new value in the terminal everytime there is a change.**
 
-``udoneo.gpios`` is an array which contains all the GPIO numbers available on the UDOO Neo (``[106,107,180,...]``). By looping on it we can access all the GPIOs at once.
+``udoneo.gpioNumbers`` is an array which contains all the GPIO numbers available on the UDOO Neo (``[106,107,180,...]``). By looping on it we can access all the GPIOs at once.
 	
-	udooneo.gpios.forEach(function (gpioNum) {
+	udooneo.gpioNumbers.forEach(function (gpioNum) {
 	
 We instantiate a new ``udooneo.GPIO`` object to manipulate it.
 	
