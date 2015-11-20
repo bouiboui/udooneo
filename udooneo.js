@@ -109,6 +109,7 @@ GPIO.prototype = {
     watchValue: function (callback) {
         var currentNum = this.currentGPIO();
         var valuePath = FILE_PATHS.ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
+        var instance = this;
         File.exists(valuePath,
             function () {
                 File.watch(valuePath, function () {
@@ -116,7 +117,7 @@ GPIO.prototype = {
                 });
             },
             function () {
-                this.export(function() {
+                instance.export(function () {
                     File.watch(valuePath, function () {
                         callback();
                     });
