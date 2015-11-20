@@ -1,19 +1,39 @@
 var udooneo = require("./udooneo");
 
-var motionSensors = [
-    {sensor: udooneo.Accelerometer, name: "Accelerometer"},
-    {sensor: udooneo.Magnetometer, name: "Magnetometer"},
-    {sensor: udooneo.Gyroscope, name: "Gyroscope"}
-];
+udooneo.Accelerometer.enable();
+udooneo.Magnetometer.enable();
+udooneo.Gyroscope.enable();
 
-motionSensors.forEach(function (item) {
-    var sensor = item.sensor;
-    sensor.enable(function () {
-        sensor.getData(function (data) {
-            console.log(item.name + " data: " + data);
+var values = [{}, {}, {}];
+
+setTimeout(function () {
+
+    var int = setInterval(function () {
+
+        udooneo.Accelerometer.getData(function (data) {
+            values[0] = data;
         });
-        sensor.watchData(function (data) {
-            console.log(item.name + " new data: " + data);
+        udooneo.Magnetometer.getData(function (data) {
+            values[1] = data;
         });
-    });
-});
+        udooneo.Gyroscope.getData(function (data) {
+            values[2] = data;
+        });
+
+        process.stdout.write('\033c');
+        console.log(values);
+
+    }, 100);
+
+    setTimeout(function () {
+        clearInterval(int);
+        udooneo.Accelerometer.disable();
+        udooneo.Magnetometer.disable();
+        udooneo.Gyroscope.disable();
+    }, 5000);
+
+}, 1000);
+
+
+
+
