@@ -3,7 +3,8 @@ var path = require("path");
 
 var FILE_PATHS = {
     ROOT: "/sys/class/gpio",
-    EXPORT_FILE: "export"
+    EXPORT_FILE: "export",
+    UNEXPORT_FILE: "unexport"
 };
 var GPIOReference = {
 
@@ -64,6 +65,14 @@ GPIO.prototype = {
             if (callback) callback();
         }, "w");
     },
+    unexport: function (callback) {
+        var currentNum = this.currentGPIO();
+        var exportFilePath = FILE_PATHS.ROOT + path.sep + FILE_PATHS.UNEXPORT_FILE;
+        File.write(currentNum.toString(), exportFilePath, function () {
+            if (callback) callback();
+        }, "w");
+    },
+
     setDirection: function (direction, callback) {
         if ([GPIOReference.DIRECTION.INPUT, GPIOReference.DIRECTION.OUTPUT].indexOf(direction) < 0) throw new Error("Invalid direction.");
         var currentGPIO = this.currentGPIO();
@@ -151,18 +160,16 @@ var File = {
         });
     },
     write: function (data, filePath, callback, mode) {
-        console.log("trying to write "+data+" in "+filePath);
+        console.log("trying to write " + data + " in " + filePath);
         if (!mode) mode = "w";
-        fs.open(filePath, mode, function (err, fd) {
+        var fd = fs.openSync(filePath, mode, function (err) {
             if (err) {
                 console.log("Could not write " + data + " in " + filePath + " | " + mode);
                 throw err;
             }
-            fs.write(fd, data, "utf-8", function (err) {
-                if (err) throw err;
-                callback();
-            });
         });
+        fs.writeSync(fd, data, "utf-8");
+        callback();
     }
 };
 
