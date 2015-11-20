@@ -4,24 +4,32 @@ udooneo.Accelerometer.enable();
 udooneo.Magnetometer.enable();
 udooneo.Gyroscope.enable();
 
-var values = [{}, {}, {}];
+var values = {
+    Accelerometer: "",
+    Magnetometer: "",
+    Gyroscope: ""
+};
 
 setTimeout(function () {
 
     var int = setInterval(function () {
 
         udooneo.Accelerometer.getData(function (data) {
-            values[0] = data;
+            values.Accelerometer = data;
         });
         udooneo.Magnetometer.getData(function (data) {
-            values[1] = data;
+            values.Magnetometer = data;
         });
         udooneo.Gyroscope.getData(function (data) {
-            values[2] = data;
+            values.Gyroscope = data;
         });
 
         process.stdout.write('\033c');
-        console.log(values);
+        console.log([
+            "Accelerometer: " + values.Accelerometer,
+            "Magnetometer: " + values.Magnetometer,
+            "Gyroscope: " + values.Gyroscope,
+        ].join("\r\n"));
 
     }, 100);
 
@@ -32,8 +40,4 @@ setTimeout(function () {
         udooneo.Gyroscope.disable();
     }, 5000);
 
-}, 1000);
-
-
-
-
+}, 500);
