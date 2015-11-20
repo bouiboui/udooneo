@@ -170,13 +170,19 @@ var File = {
     write: function (data, filePath, callback, mode) {
         console.log("trying to write " + data + " in " + filePath);
         if (!mode) mode = "w";
-        var fd = fs.openSync(filePath, mode, function (err) {
-            if (err) {
-                console.log("Could not write " + data + " in " + filePath + " | " + mode);
-                throw err;
+        try {
+            var fd = fs.openSync(filePath, mode, function (err) {
+                if (err) {
+                    console.log("Could not write " + data + " in " + filePath + " | " + mode);
+                    throw err;
+                }
+            });
+            fs.writeSync(fd, data, "utf-8");
+        } catch (err) {
+            if ("EBUSY" === err.errno) {
+                this.write(data, filePath, callback, mode);
             }
-        });
-        fs.writeSync(fd, data, "utf-8");
+        }
         callback();
     }
 };
