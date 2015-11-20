@@ -8,7 +8,7 @@ This code has never been tested on an actual UDOO Neo, it was developed only fro
 ## Getting started
 To get started, let's review the [test.js](https://github.com/bouiboui/udooneo/blob/master/examples/test.js) source code.
 
-To try it, clone the repo locally, open a terminal and type ``node examples/test``.
+To try it, clone the repo locally, open a terminal and type ``sudo node examples/test``.
 
 First we require the *udooneo* library:
 
