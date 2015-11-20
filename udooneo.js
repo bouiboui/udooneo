@@ -63,7 +63,8 @@ GPIO.prototype = {
         var exportFilePath = FILE_PATHS.ROOT + path.sep + FILE_PATHS.EXPORT_FILE;
         File.exists(FILE_PATHS.ROOT + path.sep + "gpio" + currentNum,
             function () {
-                // already exported, do nothing
+                // already exported
+                if (callback) callback();
             },
             function () {
                 File.write(currentNum.toString(), exportFilePath, function () {
@@ -83,7 +84,8 @@ GPIO.prototype = {
                 }, "w");
             },
             function () {
-                // already unexported, do nothing
+                // already unexported
+                if (callback) callback();
             }
         );
     },
