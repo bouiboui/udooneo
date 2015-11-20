@@ -20,3 +20,24 @@ targetGpio.setDirection(udooneo.DIRECTION.OUTPUT, function () {
         targetGpio.setValue(x++ % 2 ? udooneo.VALUE.LOW : udooneo.VALUE.HIGH);
     }, 2000);
 });
+
+process.stdin.resume();//so the program will not close instantly
+
+function exitHandler() {
+    udooneo.gpios.forEach(function (gpioNum) {
+        var gpio = new udooneo.GPIO(gpioNum);
+        gpio.unexport(function () {
+            console.log("GPIO " + gpioNum + " unexported.");
+        });
+    });
+}
+
+//do something when app is closing
+process.on('exit', function () {
+    exitHandler();
+});
+
+//catches ctrl+c event
+process.on('SIGINT', function () {
+    exitHandler();
+});
