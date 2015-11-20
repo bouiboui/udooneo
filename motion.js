@@ -11,7 +11,9 @@ motionSensors.forEach(function (item) {
     sensor.enable(function () {
         sensor.getData(function (data) {
             console.log(item.name + " data: " + data);
-            sensor.disable();
+        });
+        sensor.watchData(function (data) {
+            console.log(item.name + " new data: " + data);
         });
     });
 });
