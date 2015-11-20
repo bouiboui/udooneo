@@ -151,6 +151,7 @@ var File = {
         });
     },
     write: function (data, filePath, callback, mode) {
+        console.log("trying to write "+data+" in "+filePath);
         if (!mode) mode = "w";
         fs.open(filePath, mode, function (err, fd) {
             if (err) {
