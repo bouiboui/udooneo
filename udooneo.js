@@ -68,9 +68,17 @@ GPIO.prototype = {
     unexport: function (callback) {
         var currentNum = this.currentGPIO();
         var exportFilePath = FILE_PATHS.ROOT + path.sep + FILE_PATHS.UNEXPORT_FILE;
-        File.write(currentNum.toString(), exportFilePath, function () {
-            if (callback) callback();
-        }, "w");
+        File.exists(
+            FILE_PATHS.ROOT + path.sep + "gpio" + currentNum,
+            function () {
+                File.write(currentNum.toString(), exportFilePath, function () {
+                    if (callback) callback();
+                }, "w");
+            },
+            function () {
+                console.log("GPIO " + currentNum + " is already unexported.");
+            }
+        );
     },
 
     setDirection: function (direction, callback) {
