@@ -62,7 +62,7 @@ GPIO.prototype = {
         var exportFilePath = FILE_PATHS.ROOT + path.sep + FILE_PATHS.EXPORT_FILE;
         File.write(currentNum.toString(), exportFilePath, function () {
             if (callback) callback();
-        }, "r+");
+        }, "w");
     },
     setDirection: function (direction, callback) {
         if ([GPIOReference.DIRECTION.INPUT, GPIOReference.DIRECTION.OUTPUT].indexOf(direction) < 0) throw new Error("Invalid direction.");
