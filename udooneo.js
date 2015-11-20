@@ -116,7 +116,11 @@ GPIO.prototype = {
                 });
             },
             function () {
-                console.log(currentNum + " value unreachable.");
+                this.export(function() {
+                    File.watch(valuePath, function () {
+                        callback();
+                    });
+                });
             }
         )
 
