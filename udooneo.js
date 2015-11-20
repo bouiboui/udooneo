@@ -65,11 +65,11 @@ GPIO.prototype = {
         var currentNum = this.currentGPIO();
         var exportFilePath = FILE_PATHS.GPIO_ROOT + path.sep + FILE_PATHS.EXPORT_FILE;
         File.exists(FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum,
-            function () {
+            function success () {
                 // already exported
                 if (callback) callback();
             },
-            function () {
+            function failure () {
                 File.write(currentNum.toString(), exportFilePath, function () {
                     if (callback) callback();
                 });
@@ -81,12 +81,12 @@ GPIO.prototype = {
         var currentNum = this.currentGPIO();
         var exportFilePath = FILE_PATHS.GPIO_ROOT + path.sep + FILE_PATHS.UNEXPORT_FILE;
         File.exists(FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum,
-            function () {
+            function success () {
                 File.write(currentNum.toString(), exportFilePath, function () {
                     if (callback) callback();
                 });
             },
-            function () {
+            function failure () {
                 // already unexported
                 if (callback) callback();
             }
@@ -97,11 +97,9 @@ GPIO.prototype = {
         if ([GPIOReference.DIRECTION.INPUT, GPIOReference.DIRECTION.OUTPUT].indexOf(direction) < 0) throw new Error("Invalid direction.");
         var currentGPIO = this.currentGPIO();
         this.export(function () {
-            File.createDir(FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentGPIO, function () {
-                var directionPath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentGPIO + path.sep + "direction";
-                File.write(direction, directionPath, function () {
-                    if (callback) callback();
-                });
+            var directionPath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentGPIO + path.sep + "direction";
+            File.write(direction, directionPath, function () {
+                if (callback) callback();
             });
         });
     },
@@ -118,11 +116,9 @@ GPIO.prototype = {
         if ([GPIOReference.VALUE.HIGH, GPIOReference.VALUE.LOW].indexOf(value) < 0) throw new Error("Invalid value.");
         var currentNum = this.currentGPIO();
         this.export(function () {
-            File.createDir(FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum, function () {
-                var valuePath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
-                File.write(value.toString(), valuePath, function () {
-                    if (callback) callback();
-                });
+            var valuePath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
+            File.write(value.toString(), valuePath, function () {
+                if (callback) callback();
             });
         });
     },
@@ -138,22 +134,11 @@ GPIO.prototype = {
     watchValue: function (callback) {
         var currentNum = this.currentGPIO();
         var valuePath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
-        var instance = this;
-        File.exists(valuePath,
-            function () {
-                File.watch(valuePath, function () {
-                    callback();
-                });
-            },
-            function () {
-                instance.export(function () {
-                    File.watch(valuePath, function () {
-                        callback();
-                    });
-                });
-            }
-        )
-
+        this.export(function () {
+            File.watch(valuePath, function () {
+                callback();
+            });
+        });
     }
 };
 
@@ -184,11 +169,6 @@ MotionSensor.prototype = {
 };
 
 var File = {
-    createDir: function (path, callback) {
-        fs.mkdir(path, function () {
-            callback();
-        })
-    },
     exists: function (path, success, failure) {
         fs.access(path, function (err) {
             if (!err) success(); else failure();
