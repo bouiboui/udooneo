@@ -1,4 +1,4 @@
-var udooneo = require("./udooneo");
+var udooneo = require("../udooneo");
 
 udooneo.Accelerometer.enable();
 udooneo.Magnetometer.enable();

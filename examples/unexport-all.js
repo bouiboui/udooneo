@@ -1,4 +1,4 @@
-var udooneo = require("./udooneo");
+var udooneo = require("../udooneo");
 
 udooneo.gpioNumbers.forEach(function (gpioNum) {
     var gpio = new udooneo.GPIO(gpioNum);

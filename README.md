@@ -6,9 +6,9 @@
 This code has never been tested on an actual UDOO Neo, it was developed only from specs and on a local development environment, so run it with caution.
 
 ## Getting started
-To get started, let's review the [test.js](https://github.com/bouiboui/udooneo/blob/master/test.js) source code.
+To get started, let's review the [test.js](https://github.com/bouiboui/udooneo/blob/master/examples/test.js) source code.
 
-To try it, clone the repo locally, open a terminal and type ``node test``.
+To try it, clone the repo locally, open a terminal and type ``node examples/test``.
 
 First we require the *udooneo* library:
 
@@ -38,7 +38,7 @@ The ``watchValue`` function allows us to react to value changes on the GPIO, by 
 
 	var targetGpio = new udooneo.GPIO().fromPin(34);
 
-Setting the direction is very simple, ``setDirectio``n has two parameters, the direction and a callback. The direction can be either ``udooneo.DIRECTION.INPUT`` or ``udooneo.DIRECTION.OUTPUT``.
+Setting the direction is very simple, ``setDirection`` has two parameters, the direction and a callback. The direction can be either ``udooneo.DIRECTION.INPUT`` or ``udooneo.DIRECTION.OUTPUT``.
 
 	targetGpio.setDirection(udooneo.DIRECTION.OUTPUT, function () {
 	
