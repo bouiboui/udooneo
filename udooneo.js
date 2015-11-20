@@ -109,6 +109,7 @@ GPIO.prototype = {
     watchValue: function (callback) {
         var currentNum = this.currentGPIO();
         var valuePath = FILE_PATHS.ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
+        var instance = this;
         File.exists(valuePath,
             function () {
                 File.watch(valuePath, function () {
@@ -116,7 +117,11 @@ GPIO.prototype = {
                 });
             },
             function () {
-                console.log(currentNum + " value unreachable.");
+                instance.export(function () {
+                    File.watch(valuePath, function () {
+                        callback();
+                    });
+                });
             }
         )
 
@@ -146,6 +151,7 @@ var File = {
         });
     },
     write: function (data, filePath, callback, mode) {
+        console.log("trying to write "+data+" in "+filePath);
         if (!mode) mode = "w";
         fs.open(filePath, mode, function (err, fd) {
             if (err) {
