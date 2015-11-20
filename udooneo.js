@@ -177,7 +177,7 @@ var File = {
         });
     },
     write: function (data, filePath, callback, mode) {
-        console.log("trying to write " + data + " in " + filePath);
+        // console.log("trying to write " + data + " in " + filePath);
         if (!mode) mode = "w";
         try {
             var fd = fs.openSync(filePath, mode, function (err) {
