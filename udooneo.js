@@ -1,4 +1,5 @@
 var fs = require("fs");
+var path = require("path");
 
 var FILE_PATHS = {
     ROOT: "/sys/class/gpio",
@@ -58,7 +59,7 @@ GPIO.prototype = {
 
     export: function (callback) {
         var currentNum = this.currentGPIO();
-        var exportFilePath = FILE_PATHS.ROOT + "\\" + FILE_PATHS.EXPORT_FILE;
+        var exportFilePath = FILE_PATHS.ROOT + path.sep + FILE_PATHS.EXPORT_FILE;
         File.write(currentNum.toString(), exportFilePath, function () {
             if (callback) callback();
         }, "r+");
@@ -67,8 +68,8 @@ GPIO.prototype = {
         if ([GPIOReference.DIRECTION.INPUT, GPIOReference.DIRECTION.OUTPUT].indexOf(direction) < 0) throw new Error("Invalid direction.");
         var currentGPIO = this.currentGPIO();
         this.export(function () {
-            File.createDir(FILE_PATHS.ROOT + "\\gpio" + currentGPIO, function () {
-                var directionPath = FILE_PATHS.ROOT + "\\gpio" + currentGPIO + "\\direction";
+            File.createDir(FILE_PATHS.ROOT + path.sep + "gpio" + currentGPIO, function () {
+                var directionPath = FILE_PATHS.ROOT + path.sep + "gpio" + currentGPIO + path.sep + "direction";
                 File.write(direction, directionPath, function () {
                     if (callback) callback();
                 });
@@ -78,7 +79,7 @@ GPIO.prototype = {
     getDirection: function (callback) {
         var currentNum = this.currentGPIO();
         this.export(function () {
-            var directionPath = FILE_PATHS.ROOT + "\\gpio" + currentNum + "\\direction";
+            var directionPath = FILE_PATHS.ROOT + path.sep + "gpio" + currentNum + path.sep + "direction";
             File.read(directionPath, function (data) {
                 callback(data);
             });
@@ -88,8 +89,8 @@ GPIO.prototype = {
         if ([GPIOReference.VALUE.HIGH, GPIOReference.VALUE.LOW].indexOf(value) < 0) throw new Error("Invalid value.");
         var currentNum = this.currentGPIO();
         this.export(function () {
-            File.createDir(FILE_PATHS.ROOT + "\\gpio" + currentNum, function () {
-                var valuePath = FILE_PATHS.ROOT + "\\gpio" + currentNum + "\\value";
+            File.createDir(FILE_PATHS.ROOT + path.sep + "gpio" + currentNum, function () {
+                var valuePath = FILE_PATHS.ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
                 File.write(value, valuePath, function () {
                     if (callback) callback();
                 });
@@ -98,7 +99,7 @@ GPIO.prototype = {
     },
     getValue: function (callback) {
         var currentNum = this.currentGPIO();
-        var valuePath = FILE_PATHS.ROOT + "\\gpio" + currentNum + "\\value";
+        var valuePath = FILE_PATHS.ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
         this.export(function () {
             File.read(valuePath, function (data) {
                 callback(data);
@@ -107,7 +108,7 @@ GPIO.prototype = {
     },
     watchValue: function (callback) {
         var currentNum = this.currentGPIO();
-        var valuePath = FILE_PATHS.ROOT + "\\gpio" + currentNum + "\\value";
+        var valuePath = FILE_PATHS.ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
         File.exists(valuePath,
             function () {
                 File.watch(valuePath, function () {
