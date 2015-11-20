@@ -13,7 +13,7 @@ udooneo.gpioNumbers.forEach(function (gpioNum) {
 });
 
 var x = 0;
-var targetGpio = new udooneo.GPIO().fromPin(13);
+var targetGpio = new udooneo.GPIO().fromPin(34);
 targetGpio.setDirection(udooneo.DIRECTION.OUTPUT, function () {
     var int = setInterval(function () {
         if (x > 4) clearInterval(int);
