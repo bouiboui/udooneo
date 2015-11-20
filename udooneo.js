@@ -180,6 +180,14 @@ MotionSensor.prototype = {
         File.read(filePath, function (data) {
             callback(data);
         });
+    },
+    watchData: function (callback) {
+        var filePath = this.path + path.sep + "data";
+        File.watch(filePath, function () {
+            File.read(filePath, function (data) {
+                callback(data);
+            });
+        });
     }
 };
 
