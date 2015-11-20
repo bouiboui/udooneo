@@ -38,6 +38,6 @@ setTimeout(function () {
         udooneo.Accelerometer.disable();
         udooneo.Magnetometer.disable();
         udooneo.Gyroscope.disable();
-    }, 5000);
+    }, 10000);
 
 }, 500);
