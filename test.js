@@ -1,6 +1,6 @@
 var udooneo = require("./udooneo");
 
-udooneo.gpios.forEach(function (gpioNum) {
+udooneo.gpioNumbers.forEach(function (gpioNum) {
     var gpio = new udooneo.GPIO(gpioNum);
     gpio.getValue(function (value) {
         console.log("GPIO " + gpioNum + " current value: " + value);
