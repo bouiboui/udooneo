@@ -5,52 +5,110 @@
 ## Introduction
 This library makes it easy to control your UDOO Neo from node.
 
-Just ``require("./udooneo")`` and you have access to the GPIOs and motion sensors.
+``var udooneo = require("./udooneo")`` and you have access to the GPIOs and motion sensors.
 
-Some features for GPIOs include ``.watchValue(callback)`` which triggers your callback function every time a GPIO value changes, ``.setValue()`` to set a specific value (HIGH or LOW), ``Accelerometer``, ``Magnetometer`` and ``Gyroscope`` ``.enable(callback)``, ``.disable(callback)`` and ``.getData(callback)``.
+You can get started by running the test example: ``sudo node examples/test``
 
-Take a look at the examples to understand better.
+## GPIOs
 
-## Getting started
-To get started, let's review the [test.js](https://github.com/bouiboui/udooneo/blob/master/examples/test.js) source code.
+### Get access to a GPIO
+You can either get access to the GPIO from its Extended Pinout number (the white number on pink background in the illustration above) or from its real, internal number.
 
-To try it, clone the repo locally, open a terminal and type ``sudo node examples/test``.
+    # Most common case
+    var gpio = new udooneo.GPIO().fromPin(pinNum);
+    
+    # For geeks only
+    var gpio = new udooneo.GPIO(gpioNum);
+    
+### Read or change direction
+Then you have to set the direction, either ``udooneo.DIRECTION.INPUT`` or ``udooneo.DIRECTION.OUTPUT``. Like most methods, ``setDirection(direction, callback)`` is asynchronous and takes a lambda function as a second parameter.
 
-First we require the *udooneo* library:
+    gpio.setDirection(udooneo.DIRECTION.OUTPUT, function() {
+    	console.log("The direction is set!");
+    });
+    
+You can also get the current direction with ``getDirection(callback)``
 
-	var udooneo = require("./udooneo");
-	
-**The first part of the code will allow us to listen to all the GPIOs of the UDOO Neo, and to display the new value in the terminal everytime there is a change.**
+    gpio.getDirection(function(direction) {
+    	switch (direction) {
+    		case udooneo.DIRECTION.INPUT:
+    			console.log("Direction = input!");
+    			break;
+    		case udooneo.DIRECTION.OUTPUT:
+    			console.log("Direction = output!");
+    			break;
+    	}
+    });
+    
+### Read or change value
+You can now either use ``gpio.getValue(callback)`` or ``gpio.setValue(value, callback)``
 
-``udoneo.gpioNumbers`` is an array which contains all the GPIO numbers available on the UDOO Neo (``[106,107,180,...]``). By looping on it we can access all the GPIOs at once.
-	
-	udooneo.gpioNumbers.forEach(function (gpioNum) {
-	
-We instantiate a new ``udooneo.GPIO`` object to manipulate it.
-	
-    	var gpio = new udooneo.GPIO(gpioNum);
-    	
-The ``watchValue`` function allows us to react to value changes on the GPIO, by passing a callback as a parameter.
+The ``callback`` function will be executed when the operation is done. In the case of ``getValue``, the first parameter of the callback function is fed the value of the GPIO.
 
-    	gpio.watchValue(function () {
-    	
-``getValue`` is pretty straightforward. The value of the GPIO will be automatically passed as the first argument of the callback.
+    gpio.getValue(function(gpioValue) {
+    	switch (gpioValue) {
+    		case udooneo.VALUE.HIGH:
+    			console.log("Value = High!");
+    			break;
+    		case udooneo.VALUE.LOW:
+    			console.log("Value = Low!");
+    			break;
+    		default:
+    			console.log("Value = " + gpioValue + "!");
+    			break;
+    	}
+    });
+    
+    gpio.setValue(udooneo.VALUE.HIGH, function() {
+    	console.log("The value is now high!");
+    });
+    
+### Watch value changes
+Another nice method to know and use is ``gpio.watchValue(callback)``. It works like an event listener, ``callback`` will be executed everytime the value of the GPIO changes, in real time.
 
-        	gpio.getValue(function (value) {
+    gpio.watchValue(function() {
+    	gpio.getValue(function(gpioValue) {
+    		console.log("The value has changed! The new value is " + gpioValue);
+    	});
+    });
 
-**The second part of the code will change the value of the pin 34 (A5) to LOW or HIGH every 2 seconds about 4 times.**
-	
-``udooneo.GPIO`` has a helper method ``fromPin`` so you don't have to know the corresponding GPIO number.
+###Realease the GPIO access when you're done
+Though the access to the GPIO is abstracted by the library, it has to be undone manually by calling ``gpio.unexport(callback)`` when you're done with the GPIO. I don't know the implications of failing to do this, so I wouldn't risk it. Consider it a good practice. The callback parameter/function is not mandatory.
 
-	var targetGpio = new udooneo.GPIO().fromPin(34);
+## Motion sensors
 
-Setting the direction is very simple, ``setDirection`` has two parameters, the direction and a callback. The direction can be either ``udooneo.DIRECTION.INPUT`` or ``udooneo.DIRECTION.OUTPUT``.
+The 3 motion sensors (depending on your Neo version) are accessible via ``udooneo.Accelerometer``, ``udooneo.Magnetometer`` and ``udooneo.Gyroscope``.
 
-	targetGpio.setDirection(udooneo.DIRECTION.OUTPUT, function () {
-	
-To set a GPIO value, just use the ``setValue`` function. The parameter must be either ``udooneo.VALUE.HIGH`` or ``udooneo.VALUE.LOW``.
+### Enable or disable
 
-        	targetGpio.setValue(x++ % 2 ? udooneo.VALUE.LOW : udooneo.VALUE.HIGH);
-        	
+This couldn't be more straightforward, just ``.enable(callback)`` or ``.disable(calback)`` the sensor. As usual, these methods are asynchronous and take an optional callback function as a parameter.
+
+    udooneo.Accelerometer.enable();
+    udooneo.Magnetometer.enable();
+    udooneo.Gyroscope.enable(function() {
+    	console.log("The Gyroscope is enabled!");
+    	udooneo.Gyroscope.disable(function() {
+    		console.log("The Gyroscope is disabled!");
+    	});
+    });
+    
+![](https://38.media.tumblr.com/tumblr_lkx3onuocM1qzvwy3.gif)
+
+*I hope someone gets that joke.* 
+
+### Get data
+
+To get the current data for a motion sensor, use its ``.getData(callback)`` method.
+
+    udooneo.Magnetometer.getData(function(data) {
+    	console.log("Magnometer data: " + data);
+    });
+    
+Due to the way the value is returned, there's no ``watchData(callback)`` method, you have to use a ``setInterval`` or ``setTimeout`` to know if the value of a motion sensor has changed (hint: it's changing constantly).
+
+The data is returned in the form of a string, someting like: ``data = "1.0,1.0,1.0"``.
+I decided to return this bluntly as a string and not to convert it to a special kind of object for the moment for performance purposes. It's up to you.
+
+
 ## License
 MIT
