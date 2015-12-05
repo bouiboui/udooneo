@@ -1,8 +1,6 @@
-var udooneo = require("../udooneo");
+var neo = require("../udooneo");
 
-udooneo.gpioNumbers.forEach(function (gpioNum) {
-    var gpio = new udooneo.GPIO(gpioNum);
-    gpio.unexport(function () {
-        console.log("GPIO " + gpioNum + " unexported.");
-    });
+neo.gpios.each(function (gpio) {
+    gpio.unexport();
+    console.log(gpio.num(), " unexported.");
 });

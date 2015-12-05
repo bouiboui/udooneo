@@ -1,22 +1,17 @@
-var udooneo = require("../udooneo");
+var neo = require("../udooneo");
 
-udooneo.gpioNumbers.forEach(function (gpioNum) {
-    var gpio = new udooneo.GPIO(gpioNum);
-    gpio.getValue(function (value) {
-        console.log("GPIO " + gpioNum + " current value: " + value);
-    });
-    gpio.watchValue(function () {
-        gpio.getValue(function (value) {
-            console.log("GPIO " + gpioNum + " change - new value: " + value);
-        });
+neo.gpios.each(function (gpio) {
+    console.log("GPIO " + gpio.num() + " value = " + gpio.val());
+    gpio.watch(function () {
+        console.log("GPIO " + gpio.num() + " new value = " + gpio.val());
     });
 });
+
+var gpio = new neo.GPIO(34).out();
 
 var x = 0;
-var targetGpio = new udooneo.GPIO().fromPin(34);
-targetGpio.setDirection(udooneo.DIRECTION.OUTPUT, function () {
-    var int = setInterval(function () {
-        if (x > 4) clearInterval(int);
-        targetGpio.setValue(x++ % 2 ? udooneo.VALUE.LOW : udooneo.VALUE.HIGH);
-    }, 2000);
-});
+setInterval(function () {
+
+    gpio.val(x++ % 2 ? neo.VALUE.LOW : neo.VALUE.HIGH);
+
+}, 1000);
