@@ -61,23 +61,23 @@ GPIO.prototype = {
 
 
     _paths: function () {
-        var path = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + this.currentGPIO();
+        var gpioPath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + this.currentGPIO();
         return {
-            value: path + path.sep + "value",
-            direction: path + path.sep + "direction"
+            value: gpioPath + path.sep + "value",
+            direction: gpioPath + path.sep + "direction"
         }
     },
 
     _export: function (yes) {
         var currentNum = this.currentGPIO().toString();
-        var path = FILE_PATHS.GPIO_ROOT + path.sep;
+        var rootPath = FILE_PATHS.GPIO_ROOT + path.sep;
 
-        var gpioFileExists = File.exists(path + "gpio" + currentNum);
+        var gpioFileExists = File.exists(rootPath + "gpio" + currentNum);
         
         if (yes && gpioFileExists) return; // Already exported
         if (!yes && !gpioFileExists) return; // Already unexported
 
-        File.write(currentNum, path + (yes ? FILE_PATHS.EXPORT_FILE : FILE_PATHS.UNEXPORT_FILE));
+        File.write(currentNum, rootPath + (yes ? FILE_PATHS.EXPORT_FILE : FILE_PATHS.UNEXPORT_FILE));
 
     },
     export: function () {
