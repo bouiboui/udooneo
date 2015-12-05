@@ -1,43 +1,29 @@
-var udooneo = require("../udooneo");
+var sensors = require("../udooneo").sensors;
 
-udooneo.Accelerometer.enable();
-udooneo.Magnetometer.enable();
-udooneo.Gyroscope.enable();
+var acc = sensors.Accelerometer.enable();
+var mag = sensors.Magnetometer.enable();
+var gyr = sensors.Gyroscope.enable();
 
-var values = {
-    Accelerometer: "",
-    Magnetometer: "",
-    Gyroscope: ""
-};
+var int = setInterval(function () {
 
+    // Write values
+    process.stdout.write('\033c');
+    console.log([
+
+        "Accelerometer: " + acc.data(),
+        "Magnetometer: " + mag.data(),
+        "Gyroscope: " + gyr.data()
+
+    ].join("\r\n"));
+
+}, 100);
+
+// Disable to preserve battery
 setTimeout(function () {
+    clearInterval(int);
 
-    var int = setInterval(function () {
+    acc.disable();
+    mag.disable();
+    gyr.disable();
 
-        udooneo.Accelerometer.getData(function (data) {
-            values.Accelerometer = data;
-        });
-        udooneo.Magnetometer.getData(function (data) {
-            values.Magnetometer = data;
-        });
-        udooneo.Gyroscope.getData(function (data) {
-            values.Gyroscope = data;
-        });
-
-        process.stdout.write('\033c');
-        console.log([
-            "Accelerometer: " + values.Accelerometer,
-            "Magnetometer: " + values.Magnetometer,
-            "Gyroscope: " + values.Gyroscope,
-        ].join("\r\n"));
-
-    }, 100);
-
-    setTimeout(function () {
-        clearInterval(int);
-        udooneo.Accelerometer.disable();
-        udooneo.Magnetometer.disable();
-        udooneo.Gyroscope.disable();
-    }, 10000);
-
-}, 500);
+}, 10000);

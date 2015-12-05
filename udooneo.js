@@ -9,9 +9,9 @@ var FILE_PATHS = {
     EXPORT_FILE: "export",
     UNEXPORT_FILE: "unexport"
 };
-var GPIOReference = {
+var Ref = {
 
-    gpioNumbers: [
+    gpios: [
         106, 107, 180, 181, 172, 173, 182, 124,
         25, 22, 14, 15, 16, 17, 18, 19,
         20, 21, 203, 202, 177, 176, 175, 174,
@@ -29,18 +29,16 @@ var GPIOReference = {
 
     fromPin: function (pinNumber) {
         if (16 > pinNumber || pinNumber > 47) throw new Error("Invalid pin number.");
-        return GPIOReference.gpioNumbers[pinNumber - 16];
+        return Ref.gpios[pinNumber - 16];
     },
     isValid: function (gpioNumber) {
-        return GPIOReference.gpioNumbers.indexOf(gpioNumber) > -1;
+        return Ref.gpios.indexOf(gpioNumber) > -1;
     }
 
 };
 
 function GPIO(num) {
-    if (num) {
-        this.fromGpio(num);
-    }
+    if (num) return this.fromPin(num);
 }
 
 GPIO.prototype = {
@@ -52,93 +50,89 @@ GPIO.prototype = {
     },
 
     fromPin: function (num) {
-        this.currentGpioNumber = GPIOReference.fromPin(num);
+        this.currentGpioNumber = Ref.fromPin(num);
         return this;
     },
     fromGpio: function (gpioNumber) {
-        if (!GPIOReference.isValid(gpioNumber)) throw new Error("GPIO number (" + gpioNumber + ") is out of range.");
+        if (!Ref.isValid(gpioNumber)) throw new Error("GPIO number (" + gpioNumber + ") is out of range.");
         this.currentGpioNumber = gpioNumber;
         return this;
     },
 
-    export: function (callback) {
-        var currentNum = this.currentGPIO();
-        var exportFilePath = FILE_PATHS.GPIO_ROOT + path.sep + FILE_PATHS.EXPORT_FILE;
-        File.exists(FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum,
-            function success () {
-                // already exported
-                if (callback) callback();
-            },
-            function failure () {
-                File.write(currentNum.toString(), exportFilePath, function () {
-                    if (callback) callback();
-                });
-            }
-        );
 
-    },
-    unexport: function (callback) {
-        var currentNum = this.currentGPIO();
-        var exportFilePath = FILE_PATHS.GPIO_ROOT + path.sep + FILE_PATHS.UNEXPORT_FILE;
-        File.exists(FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum,
-            function success () {
-                File.write(currentNum.toString(), exportFilePath, function () {
-                    if (callback) callback();
-                });
-            },
-            function failure () {
-                // already unexported
-                if (callback) callback();
-            }
-        );
+    _paths: function () {
+        var gpioPath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + this.currentGPIO();
+        return {
+            value: gpioPath + path.sep + "value",
+            direction: gpioPath + path.sep + "direction"
+        }
     },
 
-    setDirection: function (direction, callback) {
-        if ([GPIOReference.DIRECTION.INPUT, GPIOReference.DIRECTION.OUTPUT].indexOf(direction) < 0) throw new Error("Invalid direction.");
-        var currentGPIO = this.currentGPIO();
-        this.export(function () {
-            var directionPath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentGPIO + path.sep + "direction";
-            File.write(direction, directionPath, function () {
-                if (callback) callback();
-            });
-        });
+    _export: function (yes) {
+        var currentNum = this.currentGPIO().toString();
+        var rootPath = FILE_PATHS.GPIO_ROOT + path.sep;
+
+        var gpioFileExists = File.exists(rootPath + "gpio" + currentNum);
+
+        if (yes && gpioFileExists) return; // Already exported
+        if (!yes && !gpioFileExists) return; // Already unexported
+
+        File.write(currentNum, rootPath + (yes ? FILE_PATHS.EXPORT_FILE : FILE_PATHS.UNEXPORT_FILE));
+
     },
-    getDirection: function (callback) {
-        var currentNum = this.currentGPIO();
-        this.export(function () {
-            var directionPath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum + path.sep + "direction";
-            File.read(directionPath, function (data) {
-                callback(data);
-            });
-        });
+    export: function () {
+        this._export(true);
     },
-    setValue: function (value, callback) {
-        if ([GPIOReference.VALUE.HIGH, GPIOReference.VALUE.LOW].indexOf(value) < 0) throw new Error("Invalid value.");
-        var currentNum = this.currentGPIO();
-        this.export(function () {
-            var valuePath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
-            File.write(value.toString(), valuePath, function () {
-                if (callback) callback();
-            });
-        });
+    unexport: function () {
+        this._export(false);
     },
-    getValue: function (callback) {
-        var currentNum = this.currentGPIO();
-        var valuePath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
-        this.export(function () {
-            File.read(valuePath, function (data) {
-                callback(data);
-            });
-        });
+
+    setDirection: function (direction) {
+        if ([Ref.DIRECTION.INPUT, Ref.DIRECTION.OUTPUT].indexOf(direction) < 0) throw new Error("Invalid direction.");
+        this.export();
+        File.write(direction, this._paths().direction);
+        return this;
+    },
+    setValue: function (value) {
+        this.export();
+        File.write(value.toString(), this._paths().value);
+        return this;
+    },
+    getDirection: function () {
+        this.export();
+        return File.read(this._paths().direction);
+    },
+    getValue: function () {
+        this.export();
+        return File.read(this._paths().value);
     },
     watchValue: function (callback) {
-        var currentNum = this.currentGPIO();
-        var valuePath = FILE_PATHS.GPIO_ROOT + path.sep + "gpio" + currentNum + path.sep + "value";
-        this.export(function () {
-            File.watch(valuePath, function () {
-                callback();
-            });
+        this.export();
+        File.watch(this._paths().value, function () {
+            callback();
         });
+    },
+
+    // Shorthands
+    in: function () {
+        return this.setDirection(Ref.DIRECTION.INPUT);
+    },
+    out: function () {
+        return this.setDirection(Ref.DIRECTION.OUTPUT);
+    },
+    dir: function (d) {
+        if (!d) return this.getDirection();
+        this.setDirection(d);
+    },
+    val: function (v) {
+        if (!v) return this.getValue();
+        this.setValue(v);
+    },
+    num: function () {
+        return this.currentGPIO();
+    },
+    watch: function (cb) {
+        this.watchValue(cb);
     }
 };
 
@@ -146,47 +140,53 @@ function MotionSensor(path) {
     this.path = path;
 }
 MotionSensor.prototype = {
-    enable: function (callback) {
-        var filePath = this.path + path.sep + "enable";
-        var value = 1;
-        File.write(value.toString(), filePath, function () {
-            if (callback) callback();
-        });
+    _enable: function (y) {
+        File.write((y ? 1 : 0).toString(),
+            this.path + path.sep + (y ? "enable" : "disable")
+        );
     },
-    disable: function (callback) {
-        var filePath = this.path + path.sep + "disable";
-        var value = 0;
-        File.write(value.toString(), filePath, function () {
-            if (callback) callback();
-        });
+    enable: function () {
+        this._enable(true);
+        return this;
     },
-    getData: function (callback) {
-        var filePath = this.path + path.sep + "data";
-        File.read(filePath, function (data) {
-            callback(data);
-        });
+    disable: function () {
+        this._enable(false);
+        return this;
+    },
+    getData: function () {
+        return File.read(this.path + path.sep + "data");
+    },
+
+    // Shorthands
+    on: function () {
+        return this.enable();
+    },
+    off: function () {
+        return this.disable();
+    },
+    data: function () {
+        return this.getData();
     }
 };
 
 var File = {
-    exists: function (path, success, failure) {
-        fs.access(path, function (err) {
-            if (!err) success(); else failure();
-        });
+    exists: function (path) {
+        try {
+            fs.accessSync(path);
+            return true;
+        } catch (e) {
+            return false;
+        }
     },
-    read: function (filePath, callback) {
-        fs.readFile(filePath, "utf-8", function (err, data) {
-            if (err) throw err;
-            callback(data);
-        });
+    read: function (filePath) {
+        return fs.readFileSync(filePath, "utf-8");
     },
     watch: function (filePath, callback) {
         fs.watch(filePath, function (event) {
             if ("change" === event) callback();
         });
     },
-    write: function (data, filePath, callback) {
-        // console.log("trying to write " + data + " in " + filePath);
+    write: function (data, filePath) {
         try {
             var fd = fs.openSync(filePath, "w", function (err) {
                 if (err) {
@@ -194,22 +194,31 @@ var File = {
                     throw err;
                 }
             });
-            fs.writeSync(fd, data, "utf-8");
+            return fs.writeSync(fd, data, "utf-8");
         } catch (err) {
             if ("EBUSY" === err.errno) {
-                this.write(data, filePath, callback);
+                return this.write(data, filePath);
             }
         }
-        callback();
     }
 };
 
 module.exports = {
-    gpioNumbers: GPIOReference.gpioNumbers,
-    DIRECTION: GPIOReference.DIRECTION,
-    VALUE: GPIOReference.VALUE,
     GPIO: GPIO,
-    Accelerometer: new MotionSensor(FILE_PATHS.ACCELEROMETER_ROOT),
-    Magnetometer: new MotionSensor(FILE_PATHS.MAGNETOMETER_ROOT),
-    Gyroscope: new MotionSensor(FILE_PATHS.GYROSCOPE_ROOT)
+
+    DIRECTION: Ref.DIRECTION,
+    VALUE: Ref.VALUE,
+
+    gpioNumbers: Ref.gpios,
+    gpios: {
+        each: function (callback) {
+            var num = Ref.gpios.length;
+            while (num--) callback(new GPIO().fromGpio(Ref.gpios[num]));
+        }
+    },
+    sensors: {
+        Accelerometer: new MotionSensor(FILE_PATHS.ACCELEROMETER_ROOT),
+        Magnetometer: new MotionSensor(FILE_PATHS.MAGNETOMETER_ROOT),
+        Gyroscope: new MotionSensor(FILE_PATHS.GYROSCOPE_ROOT)
+    }
 };
