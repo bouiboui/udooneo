@@ -73,7 +73,7 @@ GPIO.prototype = {
         var rootPath = FILE_PATHS.GPIO_ROOT + path.sep;
 
         var gpioFileExists = File.exists(rootPath + "gpio" + currentNum);
-        
+
         if (yes && gpioFileExists) return; // Already exported
         if (!yes && !gpioFileExists) return; // Already unexported
 
@@ -154,7 +154,7 @@ MotionSensor.prototype = {
         return this;
     },
     getData: function () {
-        return File.readSync(this.path + path.sep + "data");
+        return File.read(this.path + path.sep + "data");
     },
 
     // Shorthands
@@ -212,8 +212,8 @@ module.exports = {
     gpioNumbers: Ref.gpios,
     gpios: {
         each: function (callback) {
-            var num = Ref.gpios;
-            while (num--) callback(new GPIO.fromGpio(num));
+            var num = Ref.gpios.length;
+            while (num--) callback(new GPIO().fromGpio(Ref.gpios[num]));
         }
     },
     sensors: {

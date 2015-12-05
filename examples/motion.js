@@ -16,7 +16,7 @@ var int = setInterval(function () {
 
     ].join("\r\n"));
 
-}, 10);
+}, 100);
 
 // Disable to preserve battery
 setTimeout(function () {
