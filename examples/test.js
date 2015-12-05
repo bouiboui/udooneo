@@ -7,7 +7,7 @@ neo.gpios.each(function (gpio) {
     });
 });
 
-var gpio = new neo.GPIO(34).out();
+var gpio = new neo.GPIO(37).out();
 
 var x = 0;
 setInterval(function () {
