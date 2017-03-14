@@ -17,52 +17,61 @@ The LED will blink every second.
 ### Get access to a GPIO
 You can either get access to the GPIO from its Extended Pinout number (the white number on pink background in the illustration above) or from its real, internal number.
 
-    # Most common case
-    var gpio = new neo.GPIO(pinNum);
-    
-    # For geeks only
-    var gpio = new neo.GPIO().fromGpio(gpioNum);
-    
+```js
+// Most common case
+var gpio = new neo.GPIO(pinNum);
+
+// For geeks only
+var gpio = new neo.GPIO().fromGpio(gpioNum);
+```
+
 ### Read or change direction
 To set the direction, you can use the shorthand methods ``gpio.in()`` and ``gpio.out()``.
 
 You can also get the current direction with ``getDirection()``
 
-	switch (gpio.getDirection()) {
-		case neo.DIRECTION.INPUT:
-			console.log("Direction = input!");
-			break;
-		case neo.DIRECTION.OUTPUT:
-			console.log("Direction = output!");
-			break;
-	}
+```js
+switch (gpio.getDirection()) {
+	case neo.DIRECTION.INPUT:
+		console.log("Direction = input!");
+		break;
+	case neo.DIRECTION.OUTPUT:
+		console.log("Direction = output!");
+		break;
+}
+```
     
     
 ### Read or change value
 To read a value, use ``gpio.val()``.  To set the value, use ``gpio.val(value)``.
 
-    # Read value
-	switch (gpio.val()) {
-		case neo.VALUE.HIGH:
-			console.log("Value = High!");
-			break;
-		case neo.VALUE.LOW:
-			console.log("Value = Low!");
-			break;
-		default:
-			console.log("Value = " + gpio.val() + "!");
-			break;
-    }
+```js
+// Read value
+switch (gpio.val()) {
+	case neo.VALUE.HIGH:
+		console.log("Value = High!");
+		break;
+	case neo.VALUE.LOW:
+		console.log("Value = Low!");
+		break;
+	default:
+		console.log("Value = " + gpio.val() + "!");
+		break;
+}
+
+// Change value
+gpio.val(neo.VALUE.HIGH);
     
-    # Change value
-    gpio.val(neo.VALUE.HIGH);
-    
+```
+
 ### Watch value changes
 You can make your script react to value changes by using ``gpio.watch(callback)``. It works like an event listener, ``callback`` will be executed everytime the value of the GPIO changes, in real time.
 
-    gpio.watch(function() {
-    	console.log("The value has changed! The new value is " + gpio.val());
-    });
+```js
+gpio.watch(function() {
+	console.log("The value has changed! The new value is " + gpio.val());
+});
+```
 
 ###Realease the GPIO access when you're done
 Though the access to the GPIO is abstracted by the library, it has to be undone manually by calling ``gpio.unexport()`` when you're done with the GPIO. I don't know the implications of failing to do this, so I wouldn't risk it. Consider it a good practice. The callback parameter/function is not mandatory.
@@ -75,13 +84,15 @@ The 3 motion sensors (depending on your Neo version) are accessible via ``neo.se
 
 This couldn't be more straightforward, just ``.enable()`` or ``.disable()`` the sensor. 
 
-    sensors.Accelerometer.enable();
-    sensors.Magnetometer.enable();
-    sensors.Gyroscope.enable();
-    console.log("All the sensors are enabled");
-    
-    sensors.Gyroscope.disable();
-    console.log("Gyroscope is disabled");
+```js
+sensors.Accelerometer.enable();
+sensors.Magnetometer.enable();
+sensors.Gyroscope.enable();
+console.log('All the sensors are enabled');
+
+sensors.Gyroscope.disable();
+console.log('Gyroscope is disabled');
+```
     
 ![](https://38.media.tumblr.com/tumblr_lkx3onuocM1qzvwy3.gif)
 
@@ -91,7 +102,9 @@ This couldn't be more straightforward, just ``.enable()`` or ``.disable()`` the 
 
 To get the current data for a motion sensor, use its ``.data()`` method.
 
-    console.log("Magnometer data: " + sensors.Magnetometer.data();
+```js
+console.log('Magnometer data: ' + sensors.Magnetometer.data());
+```
     
 Due to the way the value is returned, there's no ``.watch(callback)`` method, you have to use a ``setInterval`` or ``setTimeout`` to know if the value of a motion sensor has changed (hint: it's changing constantly).
 
